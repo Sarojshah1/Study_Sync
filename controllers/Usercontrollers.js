@@ -111,10 +111,10 @@ const changePassword = async (req, res) => {
 
 // Get User Profile
 const getUserProfile = async (req, res) => {
-  const { userId } = req.user;
+
 
   try {
-    const user = await User.findById(userId).select('-password');
+    const user = await User.findById(req.user._id).select('-password');
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
@@ -126,11 +126,11 @@ const getUserProfile = async (req, res) => {
 };
 
 const updateUserProfile = async (req, res) => {
-  const { userId } = req.user;
+  
   const { fullName, phone } = req.body;
 
   try {
-    const user = await User.findById(userId);
+    const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }

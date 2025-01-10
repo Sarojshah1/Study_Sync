@@ -87,9 +87,7 @@ const acceptJoinRequest = async (req, res) => {
     }
 
 
-    if (group.created_by.toString() !== adminId) {
-      return res.status(403).json({ error: 'Only the group admin can accept join requests' });
-    }
+   
 
     const requestIndex = group.join_requests.findIndex((request) => request.user_id.toString() === userId);
     if (requestIndex === -1) {
