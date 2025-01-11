@@ -21,15 +21,15 @@ const createProject = async (req, res) => {
       }
       await projectPhoto.mv(uploadPath);
     }
-    const newGroup = new StudyGroup({
-        project_name,
-        description,
-        groupPhoto: projectImage,
-        created_by: userId,
-        members: [{ user_id: userId, joined_at: Date.now() }],
-      });
+    // const newGroup = new StudyGroup({
+    //     project_name,
+    //     description,
+    //     groupPhoto: projectImage,
+    //     created_by: userId,
+    //     members: [{ user_id: userId, joined_at: Date.now() }],
+    //   });
   
-      await newGroup.save();
+    //   await newGroup.save();
 
     const newProject = new Project({
       project_name,
@@ -42,7 +42,6 @@ const createProject = async (req, res) => {
 
     await newProject.save();
 
-    // Add project to user's list of projects
     await User.findByIdAndUpdate(
       userId,
       { $addToSet: { projects: newProject._id } },
