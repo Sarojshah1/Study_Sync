@@ -160,11 +160,51 @@ const getAllGroups = async (req, res) => {
   };
   
 
+const getMembers = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    // Find the study group
+    const group = await StudyGroup.findById(groupId).populate('members.user_id','name email profile_picture');
+    if (!group) {
+      return res.status(404).json({ error: 'Study group not found' });
+    }
+
+  
+    res.status(200).json({ members: group.members });
+  } catch (error) {
+    console.error('Error fetching group members:', error);
+    res.status(500).json({ error: 'Failed to fetch group members' });
+  }
+};
+
+
+const getJoinRequests = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    
+    const group = await StudyGroup.findById(groupId).populate('join_requests.user_id','name email profile_picture');
+    if (!group) {
+      return res.status(404).json({ error: 'Study group not found' });
+    }
+
+    
+    res.status(200).json({ joinRequests: group.join_requests });
+  } catch (error) {
+    console.error('Error fetching join requests:', error);
+    res.status(500).json({ error: 'Failed to fetch join requests' });
+  }
+};
+
+
 module.exports = {
   createStudyGroup,
   sendJoinRequest,
   acceptJoinRequest,
   updateStudyGroup,
   getUserGroups,
-  getAllGroups
+  getAllGroups,
+  getMembers,
+  getJoinRequests
 };

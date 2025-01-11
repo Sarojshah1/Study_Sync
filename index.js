@@ -57,6 +57,9 @@ io.on('connection', (socket) => {
         io.to(context_id).emit('startCall', context_id); // Notify all users to start the call
       }
   });
+  socket.on('typing', (context_id, userId) => {
+    socket.broadcast.to(context_id).emit('userTyping', userId);  
+  });
 
   // Handle incoming call
   socket.on('incomingCall', (callerId, context_id) => {

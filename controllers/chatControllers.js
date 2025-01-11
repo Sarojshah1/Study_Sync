@@ -22,7 +22,7 @@ const createChatMessage = async (req, res) => {
     });
 
     const savedChat = await newChat.save();
-    await savedChat.populate('sender_id', 'name email');
+    await savedChat.populate('sender_id', 'name email profile_picture');
 
     const io = req.app.get('io');
     io.to(context_id).emit('newMessage', savedChat);
@@ -42,7 +42,7 @@ const getChatMessagesByContext = async (req, res) => {
     }
 
     // Find all messages for the given context_id
-    const messages = await Chat.find({ context_id }).populate('sender_id', 'name email'); // Populate sender info if needed
+    const messages = await Chat.find({ context_id }).populate('sender_id', 'name email profile_picture');
 
     return res.status(200).json(messages);
   } catch (error) {
