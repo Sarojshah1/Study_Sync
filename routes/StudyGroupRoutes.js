@@ -14,7 +14,7 @@ const {
 const { verifyToken } = require('../middlewares/Authentication');
 
 // Routes
-router.post('/groups', verifyToken, createStudyGroup); 
+router.post('/creategroups', verifyToken, createStudyGroup);
 router.post('/groups/:groupId/join', verifyToken, sendJoinRequest); 
 router.post('/groups/:groupId/accept/:userId', verifyToken, acceptJoinRequest); 
 router.put('/groups/:groupId', verifyToken, updateStudyGroup); 
