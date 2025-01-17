@@ -6,11 +6,8 @@ const User = require('../models/UserModel'); // Import User model
 
 // Register User
 const registerUser = async (req, res) => {
-    console.log('registerUser')
-  const { name, email, password} = req.body;
-  let profilePhoto=null;
-  console.log(req.files)
-
+  const { name, email, password,bio,contact_number ,address } = req.body;
+  let profilePhoto = null;
 
   try {
     const existingUser = await User.findOne({ email });
@@ -18,29 +15,28 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'User already exists with this email.' });
     }
 
-    if(req.files){
-        const { profile_picture} = req.files;
-        profilePhoto=`photo-${Date.now()}-${profile_picture.name}`;
-        const uploadPath = path.join(__dirname, `../public/${profilePhoto}`);
-        const directoryPath = path.join(__dirname, '../public');
-        if (!fs.existsSync(directoryPath)) {
-            fs.mkdirSync(directoryPath, { recursive: true });
-          }
-          await profile_picture.mv(uploadPath);
-    }else {
-        return res.status(400).json({ message: ' Profile Photo is required.' });
+    if (req.files && req.files.profile_picture) {
+      const { profile_picture } = req.files;
+      profilePhoto = `photo-${Date.now()}-${profile_picture.name}`;
+      const uploadPath = path.join(__dirname, `../public/${profilePhoto}`);
+      const directoryPath = path.join(__dirname, '../public');
+      if (!fs.existsSync(directoryPath)) {
+        fs.mkdirSync(directoryPath, { recursive: true });
       }
+      await profile_picture.mv(uploadPath);
+    }
 
-      const hashedPassword = await bcrypt.hash(password, 10);
- 
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create a new user
     const user = new User({
       name,
       email,
       password: hashedPassword,
-     profile_picture:profilePhoto,
-      
+      bio,
+      address,
+      contact_number,
+      profile_picture: profilePhoto,
     });
 
     await user.save();
@@ -56,24 +52,19 @@ const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Find the user by email
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Check if the password is correct
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid email or password.' });
     }
 
-  
-
-    // Generate a JWT token
     const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET);
 
-    res.status(200).json({ message: 'Login successful!', token, userId: user._id});
+    res.status(200).json({ message: 'Login successful!', token, userId: user._id });
   } catch (error) {
     res.status(500).json({ message: 'Error logging in.', error });
   }
@@ -81,7 +72,7 @@ const loginUser = async (req, res) => {
 
 // Change Password
 const changePassword = async (req, res) => {
-  const { userId } = req.user; // Extract user ID from the JWT middleware
+  const { userId } = req.user;
   const { oldPassword, newPassword } = req.body;
 
   try {
@@ -91,15 +82,12 @@ const changePassword = async (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Check if the old password is correct
     const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
     if (!isOldPasswordValid) {
       return res.status(401).json({ message: 'Incorrect old password.' });
     }
 
-    // Hash the new password
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-
     user.password = hashedNewPassword;
     await user.save();
 
@@ -111,8 +99,6 @@ const changePassword = async (req, res) => {
 
 // Get User Profile
 const getUserProfile = async (req, res) => {
-
-
   try {
     const user = await User.findById(req.user._id).select('-password');
     if (!user) {
@@ -125,9 +111,9 @@ const getUserProfile = async (req, res) => {
   }
 };
 
+// Update User Profile
 const updateUserProfile = async (req, res) => {
-  
-  const { fullName, phone } = req.body;
+  const { name, bio, contact_number, address } = req.body;
 
   try {
     const user = await User.findById(req.user._id);
@@ -135,9 +121,11 @@ const updateUserProfile = async (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Update fields
-    user.fullName = fullName || user.fullName;
-    user.phone = phone || user.phone;
+    user.name = name || user.name;
+    user.bio = bio || user.bio;
+    user.contact_number = contact_number || user.contact_number;
+    user.address = address || user.address;
+   
 
     await user.save();
 
@@ -157,7 +145,6 @@ const deleteUser = async (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Soft delete (optional: set a flag or delete)
     await user.delete();
 
     res.status(200).json({ message: 'User deleted successfully!' });
@@ -166,61 +153,60 @@ const deleteUser = async (req, res) => {
   }
 };
 
+// Update Profile Picture
 const updateProfilePicture = async (req, res) => {
-    try {
-      if (!req.files || !req.files.profile_picture) {
-        return res.status(400).json({ message: 'No profile picture uploaded' });
-      }
-  
-      console.log(req.files)
-      const { profile_picture } = req.files;
-      const picturePath = `profile-${Date.now()}-${profile_picture.name}`;
-      const uploadPath = path.join(__dirname, `../public/${picturePath}`);
-  
-    
-      const directoryPath = path.join(__dirname, '../public');
-      if (!fs.existsSync(directoryPath)) {
-        fs.mkdirSync(directoryPath, { recursive: true });
-      }
-  
-      await profile_picture.mv(uploadPath);
-  
-      const user = await User.findByIdAndUpdate(
-        req.user._id,
-        { profile_picture: picturePath },
-        { new: true }
-      );
-  
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-  
-      res.status(200).json({ message: 'Profile picture updated successfully', user });
-    } catch (error) {
-      res.status(500).json({ message: 'Server error', error });
+  try {
+    if (!req.files || !req.files.profile_picture) {
+      return res.status(400).json({ message: 'No profile picture uploaded' });
     }
-  };
+
+    const { profile_picture } = req.files;
+    const picturePath = `profile-${Date.now()}-${profile_picture.name}`;
+    const uploadPath = path.join(__dirname, `../public/${picturePath}`);
+
+    const directoryPath = path.join(__dirname, '../public');
+    if (!fs.existsSync(directoryPath)) {
+      fs.mkdirSync(directoryPath, { recursive: true });
+    }
+
+    await profile_picture.mv(uploadPath);
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { profile_picture: picturePath },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({ message: 'Profile picture updated successfully', user });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+// Update Password by Email
 const updatePasswordByEmail = async (req, res) => {
-    try {
-      const { email, newPassword } = req.body;
-  
-      // Find the user by email
-      const user = await User.findOne({ email });
-      if (!user) {
-        return res.status(404).json({ message: 'User with this email does not exist' });
-      }
-  
-      // // Hash the new password and update it
-      // const hashedPassword = await bcrypt.hash(newPassword, 10);
-      user.password = newPassword;
-  
-      await user.save();
-  
-      res.status(200).json({ message: 'Password updated successfully' });
-    } catch (error) {
-      res.status(500).json({ message: 'Server error', error });
+  try {
+    const { email, newPassword } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User with this email does not exist' });
     }
-  };
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+
+    await user.save();
+
+    res.status(200).json({ message: 'Password updated successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
 
 module.exports = {
   registerUser,
@@ -230,6 +216,5 @@ module.exports = {
   updateUserProfile,
   deleteUser,
   updateProfilePicture,
-  updatePasswordByEmail
-
+  updatePasswordByEmail,
 };

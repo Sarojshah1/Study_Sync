@@ -4,23 +4,28 @@ const path = require('path');
 // Configure storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Local directory to store files
+    cb(null, 'public/'); 
   },
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}_${file.originalname}`);
+    cb(null, `${Date.now()}-${file.originalname}`);
   },
 });
 
-// File filter (optional, restrict file types)
+// Filter for file types
 const fileFilter = (req, file, cb) => {
   const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Unsupported file type'), false);
+    cb(new Error('Invalid file type. Only images and PDFs are allowed.'));
   }
 };
 
-const upload = multer({ storage, fileFilter });
+// Configure multer
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 10 * 1024 * 1024 }, 
+});
 
 module.exports = upload;
