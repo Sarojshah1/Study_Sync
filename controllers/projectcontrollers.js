@@ -7,7 +7,7 @@ const fs = require('fs');
 // Create a project
 const createProject = async (req, res) => {
   try {
-    const { project_name, description, group_id } = req.body;
+    const { project_name, description } = req.body;
     const userId = req.user._id;
 
     let projectImage = null;
@@ -21,21 +21,12 @@ const createProject = async (req, res) => {
       }
       await projectPhoto.mv(uploadPath);
     }
-    // const newGroup = new StudyGroup({
-    //     project_name,
-    //     description,
-    //     groupPhoto: projectImage,
-    //     created_by: userId,
-    //     members: [{ user_id: userId, joined_at: Date.now() }],
-    //   });
   
-    //   await newGroup.save();
 
     const newProject = new Project({
       project_name,
       description,
       created_by: userId,
-      group_id:newGroup._id,
       image:projectImage,
       members: [{ user_id: userId, joined_at: Date.now() }],
     });

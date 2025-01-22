@@ -5,7 +5,6 @@ const projectSchema = new mongoose.Schema({
   description: { type: String, required: true },
   created_by: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   image: { type: String },
-  group_id: { type: mongoose.Schema.Types.ObjectId, ref: 'StudyGroup', required: true },
   members: [
     {
       user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
