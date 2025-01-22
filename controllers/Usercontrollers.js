@@ -2,7 +2,8 @@ const bcrypt = require('bcrypt');
 const path = require('path');
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/UserModel'); // Import User model
+const User = require('../models/UserModel');
+const OTP=require('../models/Otp')
 
 // Register User
 const registerUser = async (req, res) => {
@@ -207,6 +208,46 @@ const updatePasswordByEmail = async (req, res) => {
     res.status(500).json({ message: 'Server error', error });
   }
 };
+// Update Password by Token
+const updatePasswordByToken = async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    // Find the user associated with the reset token
+    const otpRecord = await OTP.findOne({ resetToken: token });
+
+    if (!otpRecord) {
+      return res.status(404).json({ message: 'Invalid or expired token' });
+    }
+
+    // Check if the token is expired
+    const currentTime = new Date();
+    if (currentTime > otpRecord.tokenExpiration) {
+      return res.status(400).json({ message: 'Token has expired' });
+    }
+
+    // Find the user associated with the email in the OTP record
+    const user = await User.findOne({ email: otpRecord.email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Hash the new password and save it
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+
+    await user.save();
+
+    // Remove the reset token record after successful password reset
+    await OTP.findOneAndDelete({ resetToken: token });
+
+    res.status(200).json({ message: 'Password updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+
 
 module.exports = {
   registerUser,
@@ -217,4 +258,5 @@ module.exports = {
   deleteUser,
   updateProfilePicture,
   updatePasswordByEmail,
+  updatePasswordByToken
 };

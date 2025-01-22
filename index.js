@@ -102,6 +102,7 @@ app.use("/api/projects", require("./routes/ProjectRoutes"));
 app.use("/api/task", require("./routes/taskRoutes"));
 app.use('/api/chats', chatRoutes);
 app.use('/api/videoCall', require('./routes/videocall'));
+app.use('/api/otp',require('./routes/Otproutes'));
 
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
