@@ -194,7 +194,7 @@ const getUserProjects = async (req, res) => {
 // Get all projects
 const getAllProjects = async (req, res) => {
   try {
-    const projects = await Project.find().populate('created_by', 'name email');
+    const projects = await Project.find().populate('created_by', 'name email profile_picture');
 
     res.status(200).json({ message: 'All projects retrieved successfully', projects });
   } catch (error) {

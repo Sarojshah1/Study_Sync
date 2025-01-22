@@ -16,5 +16,6 @@ router.delete('/delete', verifyToken, userController.deleteUser);
 router.put('/update-profile-picture', verifyToken, userController.updateProfilePicture);
 
 router.put('/update-password-by-email', userController.updatePasswordByEmail);
+router.put('/reset-password', userController.updatePasswordByToken);
 
 module.exports = router;
