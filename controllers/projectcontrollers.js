@@ -194,6 +194,27 @@ const getAllProjects = async (req, res) => {
   }
 };
 
+const getProjectById = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+
+    // Find the project by ID and populate relevant fields
+    const project = await Project.findById(projectId)
+      .populate('created_by', 'name email profile_picture') 
+      .populate('members.user_id', 'name email profile_picture'); 
+
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    res.status(200).json({ message: 'Project retrieved successfully', project });
+  } catch (error) {
+    console.error('Error fetching project by ID:', error);
+    res.status(500).json({ error: 'Failed to fetch project' });
+  }
+};
+
+
 module.exports = {
   createProject,
   sendJoinRequest,
@@ -202,4 +223,5 @@ module.exports = {
   updateProject,
   getUserProjects,
   getAllProjects,
+  getProjectById
 };
