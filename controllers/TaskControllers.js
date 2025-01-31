@@ -4,6 +4,7 @@ const Task = require("../models/TaskModel");
 const createTask = async (req, res) => {
   try {
     const { project_id, title, description, assignee_id, priority, deadline } = req.body;
+    console.log(req.body)
 
     const newTask = new Task({
       project_id,
@@ -84,8 +85,9 @@ const deleteTask = async (req, res) => {
 const changeTaskStatus = async (req, res) => {
   try {
     const { status } = req.body;
+    console.log(status);
 
-    const validStatuses = ["To Do", "In Progress", "Done"];
+    const validStatuses = ["Backlog","To Do", "In Progress", "Done"];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ message: "Invalid status" });
     }
