@@ -4,7 +4,7 @@ const {verifyToken} = require('../middlewares/Authentication');
 
 const router = express.Router();
 
-router.post("/",verifyToken, taskController.createTask);
+router.post("/post",verifyToken, taskController.createTask);
 
 router.get("/",verifyToken, taskController.getAllTasks);
 
@@ -19,6 +19,6 @@ router.delete("/:id",verifyToken, taskController.deleteTask);
 
 router.patch("/:id/status",verifyToken, taskController.changeTaskStatus);
 
-router.get("/:project_id",verifyToken, taskController.getTasksByProjectId);
+router.get("/project/:project_id",verifyToken, taskController.getTasksByProjectId);
 
 module.exports = router;
