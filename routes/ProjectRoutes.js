@@ -8,7 +8,8 @@ const {
     updateProject,
     getUserProjects,
     getAllProjects,
-    getProjectById
+    getProjectById,
+    getJoinRequests
 } = require('../controllers/projectcontrollers');
 
 const {verifyToken} = require('../middlewares/Authentication');
@@ -22,4 +23,5 @@ router.put('/project/:groupId', verifyToken, updateProject);
 router.get('/userProjects', verifyToken, getUserProjects); 
 router.get('/projects', verifyToken, getAllProjects); 
 router.get('/projects/:projectId', getProjectById);
+router.get('/projects/:Id/join-requests', verifyToken, getJoinRequests); 
 module.exports = router;
