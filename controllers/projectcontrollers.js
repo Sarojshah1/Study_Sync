@@ -89,9 +89,9 @@ const acceptJoinRequest = async (req, res) => {
       return res.status(404).json({ error: 'Project not found' });
     }
 
-    if (project.created_by.toString() !== adminId) {
-      return res.status(403).json({ error: 'Only the project admin can accept join requests' });
-    }
+    // if (project.created_by.toString() !== adminId) {
+    //   return res.status(403).json({ error: 'Only the project admin can accept join requests' });
+    // }
 
     const requestIndex = project.join_requests.findIndex((request) => request.user_id.toString() === userId);
     if (requestIndex === -1) {
@@ -214,6 +214,25 @@ const getProjectById = async (req, res) => {
   }
 };
 
+const getJoinRequests = async (req, res) => {
+  try {
+    const { Id } = req.params;
+    console.log(Id)
+
+    
+    const group = await Project.findById(Id).populate('join_requests.user_id','name email profile_picture');
+    if (!group) {
+      return res.status(404).json({ error: 'Study group not found' });
+    }
+
+    
+    res.status(200).json({ joinRequests: group.join_requests });
+  } catch (error) {
+    console.error('Error fetching join requests:', error);
+    res.status(500).json({ error: 'Failed to fetch join requests' });
+  }
+};
+
 
 module.exports = {
   createProject,
@@ -223,5 +242,6 @@ module.exports = {
   updateProject,
   getUserProjects,
   getAllProjects,
-  getProjectById
+  getProjectById,
+  getJoinRequests
 };
